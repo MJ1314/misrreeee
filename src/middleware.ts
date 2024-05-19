@@ -33,9 +33,13 @@ export default authMiddleware({
       return NextResponse.redirect(new URL(`/agency/sign-in`, req.url))
     }
 
+    // Serve the HTML site as the landing page
+    if (url.pathname === '/') {
+      return NextResponse.rewrite(new URL('/index.html', req.url))
+    }
+
     if (
-      url.pathname === '/' ||
-      (url.pathname === '/site' && url.host === process.env.NEXT_PUBLIC_DOMAIN)
+      url.pathname === '/site' && url.host === process.env.NEXT_PUBLIC_DOMAIN
     ) {
       return NextResponse.rewrite(new URL('/site', req.url))
     }
