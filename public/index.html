@@ -7,7 +7,7 @@
     <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
     <link rel="manifest" href="assets/site.webmanifest">
      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mesire - Premier Web Design </title>
+    <title>Mesire - AI Web Design </title>
     <meta
       name="description"
       content="We create digital experience at the intersection between design and technology, helping our clients to imagine the future, today."
@@ -26,23 +26,7 @@
     <link rel="sitemap" href="/sitemap-index.xml" />
     <!-- Google Tag Manager -->
     <!-- End Google Tag Manager -->
-    <script
-      src="https://form.jotform.com/static/feedback2.js"
-      type="text/javascript"
-    ></script>
-    <script type="text/javascript">
-      var JFL_240245761444353 = new JotformFeedback({
-        formId: "240245761444353",
-        base: "https://form.jotform.com/",
-        windowTitle: "USTA AGENCY - WORK WITH US",
-        backgroundColor: "#000000",
-        fontColor: "#FFFFFF",
-        type: "2",
-        height: 500,
-        width: 700,
-        openOnLoad: false,
-      });
-    </script>
+   
     <script type="text/javascript">
       var ifr = document.getElementById("lightbox-240245761444353");
       if (ifr) {
@@ -168,16 +152,7 @@
     <script type="module" src="/_astro/hoisted.0660e9c0.js"></script>
   </head>
   <body style="background-color: #000000">
-    <!-- Google Tag Manager (noscript) -->
-    <noscript
-      ><iframe
-        src="https://www.googletagmanager.com/ns.html?id=GTM-NB3TPR38"
-        height="0"
-        width="0"
-        style="display: none; visibility: hidden"
-      ></iframe
-    ></noscript>
-    <!-- End Google Tag Manager (noscript) -->
+   
     <header
       id="main-header"
       style="opacity: 0"
@@ -192,7 +167,7 @@
           <li class="">
             <a
               title="Go to Let's talk"
-              href="/agency"
+              href="#contacts"
               data-cursor="100"
               class=""
             >
@@ -388,40 +363,58 @@
            
           </div>
         </main>
+
         <section
-          id="contacts"
-          class="min-h-[50vh] lg:min-h-screen lg:mt-[20vh] lg:pb-40 lg:pt-0 flex items-center"
+        id="contacts"
+        class="min-h-[50vh] lg:min-h-screen lg:mt-[20vh] lg:pb-40 lg:pt-0 flex items-center"
+      >
+        <div
+          class="container flex justify-center words-splitted"
+          data-amount="2"
         >
-          <div
-            class="container flex justify-center words-splitted"
-            data-amount="2"
-          >
-            <div>
-              <p class="ml-1 lg:ml-2 lg:text-lg">Let's Go</p>
-              <h2
-                class="text-4xl md:text-6xl lg:text-[100px] 2xl:text-[150px] w-max text-gray-300 font-extralight"
-              >
-                <a
-                  href="/agency"
-                  class="leading-tight"
-                  data-cursor="200"
-                  >Get Started</a
+          <div class="w-full lg:w-1/2">
+            <p class="ml-1 lg:ml-2 text-4xl lg:text-6xl text-center">Get Notified When We Launch</p>
+            <h2
+              class="text-4xl md:text-6xl lg:text-[50px] 2xl:text-[70px] w-full text-gray-300 font-extralight text-center"
+            >
+              <!-- Insert the Formspree form here -->
+              <form action="https://formspree.io/f/xeqybbek" method="POST" class="w-full lg:w-3/4 mx-auto">
+                <label for="email" style="color: white; font-size: 20px;"></label>
+                <input 
+                  type="email" 
+                  id="email" 
+                  name="email" 
+                  placeholder="email"
+                  required 
+                  style="background-color: transparent; color: white; border: 1px solid white; border-radius: 8px; padding: 12px; width: 100%; box-sizing: border-box; margin-bottom: 12px; font-size: 18px;"
                 >
-              </h2>
-            </div>
+                <button 
+                  type="submit" 
+                  style="background-color: white; color: black; border: none; padding: 12px 24px; cursor: pointer; font-size: 18px; border-radius: 8px; display: block; margin: 0 auto;"
+                >
+                  Submit
+                </button>
+              </form>
+            </h2>
+          </div>
+        </div>
+      </section>
+
+
+      <footer
+        class="text-white pb-20 lg:absolute bottom-0 left-0 right-0 words-splitted"
+        data-amount="3"
+      >
+        <section>
+          <div class="container text-white/70 mt-10 text-base">
+            &copy;Copyright 2024 Mesire
           </div>
         </section>
-        <footer
-          class="text-white pb-20 lg:absolute bottom-0 left-0 right-0 words-splitted"
-          data-amount="3"
-        >
-          <section>
-            
-            <div class="container text-white/70 mt-10 text-base">
-              &copy;Copyright 2024 Mesire
-            </div>
-          </section>
-        </footer>
+      </footer>
+      
+      
+
+
       </div>
     </div>
     <div

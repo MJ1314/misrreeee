@@ -19,58 +19,51 @@ import {
   CommandList,
 } from '@/components/ui/command'
 import { getAuthUserDetails } from '@/lib/queries'
-import { SubAccount } from '@prisma/client'
 import Image from 'next/image'
 import Link from 'next/link'
-
 import React from 'react'
 import DeleteButton from './_components/delete-button'
-import CreateSubaccountButton from './_components/create-subaccount-btn'
 
 type Props = {
   params: { agencyId: string }
 }
 
-const AllSubaccountsPage = async ({ params }: Props) => {
+const AllAccountsPage = async ({ params }: Props) => {
   const user = await getAuthUserDetails()
   if (!user) return
 
   return (
     <AlertDialog>
       <div className="flex flex-col ">
-        <CreateSubaccountButton
-          user={user}
-          id={params.agencyId}
-          className="w-[200px] self-end m-6"
-        />
+        
         <Command className="rounded-lg bg-transparent">
           <CommandInput placeholder="Search Account..." />
           <CommandList>
             <CommandEmpty>No Results Found.</CommandEmpty>
-            <CommandGroup heading="Sub Accounts">
-              {!!user.Agency?.SubAccount.length ? (
-                user.Agency.SubAccount.map((subaccount: SubAccount) => (
+            <CommandGroup heading="Accounts">
+              {!!user.Agency?.users.length ? (
+                user.Agency.users.map((account) => (
                   <CommandItem
-                    key={subaccount.id}
+                    key={account.id}
                     className="h-32 !bg-background my-2 text-primary border-[1px] border-border p-4 rounded-lg hover:!bg-background cursor-pointer transition-all"
                   >
                     <Link
-                      href={`/subaccount/${subaccount.id}`}
+                      href={`/account/${account.id}`}
                       className="flex gap-4 w-full h-full"
                     >
                       <div className="relative w-32">
                         <Image
-                          src={subaccount.subAccountLogo}
-                          alt="subaccount logo"
+                          src={account.avatarUrl}
+                          alt="account logo"
                           fill
                           className="rounded-md object-contain bg-muted/50 p-4"
                         />
                       </div>
                       <div className="flex flex-col justify-between">
                         <div className="flex flex-col">
-                          {subaccount.name}
+                          {account.name}
                           <span className="text-muted-foreground text-xs">
-                            {subaccount.address}
+                            {account.email}
                           </span>
                         </div>
                       </div>
@@ -90,8 +83,8 @@ const AllSubaccountsPage = async ({ params }: Props) => {
                           Are your absolutely sure
                         </AlertDialogTitle>
                         <AlertDescription className="text-left">
-                          This action cannot be undon. This will delete the
-                          subaccount and all data related to the subaccount.
+                          This action cannot be undone. This will delete the
+                          account and all data related to the account.
                         </AlertDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter className="flex items-center">
@@ -99,7 +92,7 @@ const AllSubaccountsPage = async ({ params }: Props) => {
                           Cancel
                         </AlertDialogCancel>
                         <AlertDialogAction className="bg-destructive hover:bg-destructive">
-                          <DeleteButton subaccountId={subaccount.id} />
+                          <DeleteButton accountId={account.id} />
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
@@ -107,7 +100,7 @@ const AllSubaccountsPage = async ({ params }: Props) => {
                 ))
               ) : (
                 <div className="text-muted-foreground text-center p-4">
-                  No Sub accounts
+                  No accounts
                 </div>
               )}
             </CommandGroup>
@@ -118,4 +111,4 @@ const AllSubaccountsPage = async ({ params }: Props) => {
   )
 }
 
-export default AllSubaccountsPage
+export default AllAccountsPage

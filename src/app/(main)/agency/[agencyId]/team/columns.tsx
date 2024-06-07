@@ -8,7 +8,6 @@ import {
   Permissions,
   Prisma,
   Role,
-  SubAccount,
   User,
 } from '@prisma/client'
 import Image from 'next/image'
@@ -42,126 +41,85 @@ import { deleteUser, getUser } from '@/lib/queries'
 import { useToast } from '@/components/ui/use-toast'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { UsersWithAgencySubAccountPermissionsSidebarOptions } from '@/lib/types'
+import { UsersWithAgencyPermissionsSidebarOptions } from '@/lib/types'
 import CustomModal from '@/components/global/custom-modal'
 
-export const columns: ColumnDef<UsersWithAgencySubAccountPermissionsSidebarOptions>[] =
-  [
-    {
-      accessorKey: 'id',
-      header: '',
-      cell: () => {
-        return null
-      },
+export const columns: ColumnDef<UsersWithAgencyPermissionsSidebarOptions>[] = [
+  {
+    accessorKey: 'id',
+    header: '',
+    cell: () => {
+      return null
     },
-    {
-      accessorKey: 'name',
-      header: 'Name',
-      cell: ({ row }) => {
-        const avatarUrl = row.getValue('avatarUrl') as string
-        return (
-          <div className="flex items-center gap-4">
-            <div className="h-11 w-11 relative flex-none">
-              <Image
-                src={avatarUrl}
-                fill
-                className="rounded-full object-cover"
-                alt="avatar image"
-              />
-            </div>
-            <span>{row.getValue('name')}</span>
+  },
+  {
+    accessorKey: 'name',
+    header: 'Name',
+    cell: ({ row }) => {
+      const avatarUrl = row.getValue('avatarUrl') as string
+      return (
+        <div className="flex items-center gap-4">
+          <div className="h-11 w-11 relative flex-none">
+            <Image
+              src={avatarUrl}
+              fill
+              className="rounded-full object-cover"
+              alt="avatar image"
+            />
           </div>
-        )
-      },
+          <span>{row.getValue('name')}</span>
+        </div>
+      )
     },
-    {
-      accessorKey: 'avatarUrl',
-      header: '',
-      cell: () => {
-        return null
-      },
+  },
+  {
+    accessorKey: 'avatarUrl',
+    header: '',
+    cell: () => {
+      return null
     },
-    { accessorKey: 'email', header: 'Email' },
+  },
+  { accessorKey: 'email', header: 'Email' },
+  {
+    accessorKey: 'role',
+    header: 'Role',
+    cell: ({ row }) => {
+      const role: Role = row.getValue('role')
+      return (
+        <Badge
+          className={clsx({
+            'bg-emerald-500': role === 'AGENCY_OWNER',
+            'bg-orange-400': role === 'AGENCY_ADMIN',
+            'bg-primary': role === 'USER',
+            'bg-muted': role === 'GUEST',
+          })}
+        >
+          {role}
+        </Badge>
+      )
+    },
+  },
+  {
+    id: 'actions',
+    cell: ({ row }) => {
+      const rowData = row.original
 
-    {
-      accessorKey: 'SubAccount',
-      header: 'Owned Accounts',
-      cell: ({ row }) => {
-        const isAgencyOwner = row.getValue('role') === 'AGENCY_OWNER'
-        const ownedAccounts = row.original?.Permissions.filter(
-          (per) => per.access
-        )
-
-        if (isAgencyOwner)
-          return (
-            <div className="flex flex-col items-start">
-              <div className="flex flex-col gap-2">
-                <Badge className="bg-slate-600 whitespace-nowrap">
-                  Agency - {row?.original?.Agency?.name}
-                </Badge>
-              </div>
-            </div>
-          )
-        return (
-          <div className="flex flex-col items-start">
-            <div className="flex flex-col gap-2">
-              {ownedAccounts?.length ? (
-                ownedAccounts.map((account) => (
-                  <Badge
-                    key={account.id}
-                    className="bg-slate-600 w-fit whitespace-nowrap"
-                  >
-                    Sub Account - {account.SubAccount.name}
-                  </Badge>
-                ))
-              ) : (
-                <div className="text-muted-foreground">No Access Yet</div>
-              )}
-            </div>
-          </div>
-        )
-      },
+      return <CellActions rowData={rowData} />
     },
-    {
-      accessorKey: 'role',
-      header: 'Role',
-      cell: ({ row }) => {
-        const role: Role = row.getValue('role')
-        return (
-          <Badge
-            className={clsx({
-              'bg-emerald-500': role === 'AGENCY_OWNER',
-              'bg-orange-400': role === 'AGENCY_ADMIN',
-              'bg-primary': role === 'SUBACCOUNT_USER',
-              'bg-muted': role === 'SUBACCOUNT_GUEST',
-            })}
-          >
-            {role}
-          </Badge>
-        )
-      },
-    },
-    {
-      id: 'actions',
-      cell: ({ row }) => {
-        const rowData = row.original
-
-        return <CellActions rowData={rowData} />
-      },
-    },
-  ]
+  },
+]
 
 interface CellActionsProps {
-  rowData: UsersWithAgencySubAccountPermissionsSidebarOptions
+  rowData: UsersWithAgencyPermissionsSidebarOptions
 }
 
 const CellActions: React.FC<CellActionsProps> = ({ rowData }) => {
-  const { data, setOpen } = useModal()
+  const { setOpen } = useModal()
   const { toast } = useToast()
   const [loading, setLoading] = useState(false)
   const router = useRouter()
-  if (!rowData) return
-  if (!rowData.Agency) return
+  if (!rowData) return null
+  if (!rowData.Agency) return null
 
   return (
     <AlertDialog>
@@ -189,13 +147,13 @@ const CellActions: React.FC<CellActionsProps> = ({ rowData }) => {
             onClick={() => {
               setOpen(
                 <CustomModal
-                  subheading="You can change permissions only when the user has an owned subaccount"
+                  subheading="Edit user details"
                   title="Edit User Details"
                 >
                   <UserDetails
                     type="agency"
                     id={rowData?.Agency?.id || null}
-                    subAccounts={rowData?.Agency?.SubAccount}
+                    userData={rowData}
                   />
                 </CustomModal>,
                 async () => {

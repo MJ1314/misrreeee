@@ -24,21 +24,18 @@ const SettingsPage = async ({ params }: Props) => {
       id: params.agencyId,
     },
     include: {
-      SubAccount: true,
+      users: true,
     },
   })
 
   if (!agencyDetails) return null
 
-  const subAccounts = agencyDetails.SubAccount
-
   return (
-    <div className="flex lg:!flex-row flex-col gap-4">
+    <div className="flex lg:flex-row flex-col gap-4">
       <AgencyDetails data={agencyDetails} />
       <UserDetails
         type="agency"
         id={params.agencyId}
-        subAccounts={subAccounts}
         userData={userDetails}
       />
     </div>

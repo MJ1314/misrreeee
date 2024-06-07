@@ -220,8 +220,14 @@ export type EditorBtns =
   | 'video'
   | '__body'
   | 'image'
+  | 'hero'
+  | 'header'
+  | 'footer'  // Added footer
+  | 'button' // Add button
+  | 'photo'// Add this line
   | null
   | '3Col'
+
 
 export const defaultStyles: React.CSSProperties = {
   backgroundPosition: 'center',
