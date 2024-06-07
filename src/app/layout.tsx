@@ -11,8 +11,8 @@ import { Toaster as SonnarToaster } from '@/components/ui/sonner'
 const font = DM_Sans({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Mesire',
-  description: 'AI Website Creation',
+  title: 'Plura',
+  description: 'All in one Agency Solution',
 }
 
 export default function RootLayout({
