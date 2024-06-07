@@ -43,12 +43,15 @@ const Page = async ({
     where: {
       id: params.agencyId,
     },
-    include: {
-      users: true, // Include users in the query
-    },
   })
 
   if (!agencyDetails) return
+
+  const subaccounts = await db.subAccount.findMany({
+    where: {
+      agencyId: params.agencyId,
+    },
+  })
 
   if (agencyDetails.connectAccountId) {
     const response = await stripe.accounts.retrieve({
@@ -68,7 +71,7 @@ const Page = async ({
       .filter((session) => session.status === 'complete')
       .map((session) => ({
         ...session,
-        created: new Date(session.created * 1000).toLocaleDateString(),
+        created: new Date(session.created).toLocaleDateString(),
         amount_total: session.amount_total ? session.amount_total / 100 : 0,
       }))
 
@@ -76,7 +79,7 @@ const Page = async ({
       .filter((session) => session.status === 'open')
       .map((session) => ({
         ...session,
-        created: new Date(session.created * 1000).toLocaleDateString(),
+        created: new Date(session.created).toLocaleDateString(),
         amount_total: session.amount_total ? session.amount_total / 100 : 0,
       }))
     net = +totalClosedSessions
@@ -153,10 +156,10 @@ const Page = async ({
           <Card className="flex-1 relative">
             <CardHeader>
               <CardDescription>Active Clients</CardDescription>
-              <CardTitle className="text-4xl">{agencyDetails.users.length}</CardTitle>
+              <CardTitle className="text-4xl">{subaccounts.length}</CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground">
-              Reflects the number of users you own and manage.
+              Reflects the number of sub accounts you own and manage.
             </CardContent>
             <Contact2 className="absolute right-4 top-4 text-muted-foreground" />
           </Card>
@@ -165,7 +168,8 @@ const Page = async ({
               <CardTitle>Agency Goal</CardTitle>
               <CardDescription>
                 <p className="mt-2">
-                  Reflects the number of users you want to own and manage.
+                  Reflects the number of sub accounts you want to own and
+                  manage.
                 </p>
               </CardDescription>
             </CardHeader>
@@ -173,14 +177,14 @@ const Page = async ({
               <div className="flex flex-col w-full">
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground text-sm">
-                    Current: {agencyDetails.users.length}
+                    Current: {subaccounts.length}
                   </span>
                   <span className="text-muted-foreground text-sm">
                     Goal: {agencyDetails.goal}
                   </span>
                 </div>
                 <Progress
-                  value={(agencyDetails.users.length / agencyDetails.goal) * 100}
+                  value={(subaccounts.length / agencyDetails.goal) * 100}
                 />
               </div>
             </CardFooter>

@@ -29,10 +29,10 @@ import { useRouter } from 'next/navigation'
 import { useModal } from '@/providers/modal-provider'
 
 interface ContactUserFormProps {
-  agencyId: string
+  subaccountId: string
 }
 
-const ContactUserForm: React.FC<ContactUserFormProps> = ({ agencyId }) => {
+const ContactUserForm: React.FC<ContactUserFormProps> = ({ subaccountId }) => {
   const { setClose, data } = useModal()
   const router = useRouter()
   const form = useForm<z.infer<typeof ContactUserFormSchema>>({
@@ -58,34 +58,36 @@ const ContactUserForm: React.FC<ContactUserFormProps> = ({ agencyId }) => {
     try {
       const response = await upsertContact({
         email: values.email,
-        agencyId: agencyId,
+        subAccountId: subaccountId,
         name: values.name,
       })
       await saveActivityLogsNotification({
-        agencyId: agencyId,
+        agencyId: undefined,
         description: `Updated a contact | ${response?.name}`,
+        subaccountId: subaccountId,
       })
       toast({
         title: 'Success',
-        description: 'Saved contact details',
+        description: 'Saved funnel details',
       })
       setClose()
       router.refresh()
     } catch (error) {
       toast({
         variant: 'destructive',
-        title: 'Oops!',
-        description: 'Could not save contact details',
+        title: 'Oppse!',
+        description: 'Could not save funnel details',
       })
     }
   }
 
   return (
-    <Card className="w-full">
+    <Card className=" w-full">
       <CardHeader>
         <CardTitle>Contact Info</CardTitle>
         <CardDescription>
-          You can assign tickets to contacts and set a value for each contact in the ticket.
+          You can assign tickets to contacts and set a value for each contact in
+          the ticket.
         </CardDescription>
       </CardHeader>
       <CardContent>

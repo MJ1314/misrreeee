@@ -55,7 +55,7 @@ type Props = {
 }
 
 const FormSchema = z.object({
-  name: z.string().min(2, { message: 'Agency name must be at least 2 chars.' }),
+  name: z.string().min(2, { message: 'Agency name must be atleast 2 chars.' }),
   companyEmail: z.string().min(1),
   companyPhone: z.string().min(1),
   whiteLabel: z.boolean(),
@@ -166,29 +166,28 @@ const AgencyDetails = ({ data }: Props) => {
       console.log(error)
       toast({
         variant: 'destructive',
-        title: 'Oops!',
-        description: 'Could not create your agency',
+        title: 'Oppse!',
+        description: 'could not create your agency',
       })
     }
   }
-
   const handleDeleteAgency = async () => {
     if (!data?.id) return
     setDeletingAgency(true)
-    // WIP: discontinue the subscription
+    //WIP: discontinue the subscription
     try {
-      await deleteAgency(data.id)
+      const response = await deleteAgency(data.id)
       toast({
         title: 'Deleted Agency',
-        description: 'Deleted your agency and all associated data',
+        description: 'Deleted your agency and all subaccounts',
       })
       router.refresh()
     } catch (error) {
       console.log(error)
       toast({
         variant: 'destructive',
-        title: 'Oops!',
-        description: 'Could not delete your agency',
+        title: 'Oppse!',
+        description: 'could not delete your agency ',
       })
     }
     setDeletingAgency(false)
@@ -200,12 +199,16 @@ const AgencyDetails = ({ data }: Props) => {
         <CardHeader>
           <CardTitle>Agency Information</CardTitle>
           <CardDescription>
-            Let's create an agency for your business. You can edit agency settings later from the agency settings tab.
+            Lets create an agency for you business. You can edit agency settings
+            later from the agency settings tab.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            <form
+              onSubmit={form.handleSubmit(handleSubmit)}
+              className="space-y-4"
+            >
               <FormField
                 disabled={isLoading}
                 control={form.control}
@@ -233,7 +236,10 @@ const AgencyDetails = ({ data }: Props) => {
                     <FormItem className="flex-1">
                       <FormLabel>Agency Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Your agency name" {...field} />
+                        <Input
+                          placeholder="Your agency name"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -246,7 +252,11 @@ const AgencyDetails = ({ data }: Props) => {
                     <FormItem className="flex-1">
                       <FormLabel>Agency Email</FormLabel>
                       <FormControl>
-                        <Input readOnly placeholder="Email" {...field} />
+                        <Input
+                          readOnly
+                          placeholder="Email"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -262,7 +272,10 @@ const AgencyDetails = ({ data }: Props) => {
                     <FormItem className="flex-1">
                       <FormLabel>Agency Phone Number</FormLabel>
                       <FormControl>
-                        <Input placeholder="Phone" {...field} />
+                        <Input
+                          placeholder="Phone"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -280,9 +293,12 @@ const AgencyDetails = ({ data }: Props) => {
                       <div>
                         <FormLabel>Whitelabel Agency</FormLabel>
                         <FormDescription>
-                          Turning on whitelabel mode will show your agency logo to all users by default.
+                          Turning on whilelabel mode will show your agency logo
+                          to all sub accounts by default. You can overwrite this
+                          functionality through sub account settings.
                         </FormDescription>
                       </div>
+
                       <FormControl>
                         <Switch
                           checked={field.value}
@@ -301,7 +317,10 @@ const AgencyDetails = ({ data }: Props) => {
                   <FormItem className="flex-1">
                     <FormLabel>Address</FormLabel>
                     <FormControl>
-                      <Input placeholder="123 st..." {...field} />
+                      <Input
+                        placeholder="123 st..."
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -316,7 +335,10 @@ const AgencyDetails = ({ data }: Props) => {
                     <FormItem className="flex-1">
                       <FormLabel>City</FormLabel>
                       <FormControl>
-                        <Input placeholder="City" {...field} />
+                        <Input
+                          placeholder="City"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -330,7 +352,10 @@ const AgencyDetails = ({ data }: Props) => {
                     <FormItem className="flex-1">
                       <FormLabel>State</FormLabel>
                       <FormControl>
-                        <Input placeholder="State" {...field} />
+                        <Input
+                          placeholder="State"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -342,9 +367,12 @@ const AgencyDetails = ({ data }: Props) => {
                   name="zipCode"
                   render={({ field }) => (
                     <FormItem className="flex-1">
-                      <FormLabel>Zipcode</FormLabel>
+                      <FormLabel>Zipcpde</FormLabel>
                       <FormControl>
-                        <Input placeholder="Zipcode" {...field} />
+                        <Input
+                          placeholder="Zipcode"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -359,7 +387,10 @@ const AgencyDetails = ({ data }: Props) => {
                   <FormItem className="flex-1">
                     <FormLabel>Country</FormLabel>
                     <FormControl>
-                      <Input placeholder="Country" {...field} />
+                      <Input
+                        placeholder="Country"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -369,7 +400,8 @@ const AgencyDetails = ({ data }: Props) => {
                 <div className="flex flex-col gap-2">
                   <FormLabel>Create A Goal</FormLabel>
                   <FormDescription>
-                    ✨ Create a goal for your agency. As your business grows, your goals grow too, so don't forget to set the bar higher!
+                    ✨ Create a goal for your agency. As your business grows
+                    your goals grow too so dont forget to set the bar higher!
                   </FormDescription>
                   <NumberInput
                     defaultValue={data?.goal}
@@ -378,17 +410,21 @@ const AgencyDetails = ({ data }: Props) => {
                       await updateAgencyDetails(data.id, { goal: val })
                       await saveActivityLogsNotification({
                         agencyId: data.id,
-                        description: `Updated the agency goal to | ${val} users`,
+                        description: `Updated the agency goal to | ${val} Sub Account`,
+                        subaccountId: undefined,
                       })
                       router.refresh()
                     }}
                     min={1}
                     className="bg-background !border !border-input"
-                    placeholder="Goal"
+                    placeholder="Sub Account Goal"
                   />
                 </div>
               )}
-              <Button type="submit" disabled={isLoading}>
+              <Button
+                type="submit"
+                disabled={isLoading}
+              >
                 {isLoading ? <Loading /> : 'Save Agency Information'}
               </Button>
             </form>
@@ -400,11 +436,13 @@ const AgencyDetails = ({ data }: Props) => {
                 <div>Danger Zone</div>
               </div>
               <div className="text-muted-foreground">
-                Deleting your agency cannot be undone. This will delete all associated data.
+                Deleting your agency cannpt be undone. This will also delete all
+                sub accounts and all data related to your sub accounts. Sub
+                accounts will no longer have access to funnels, contacts etc.
               </div>
               <AlertDialogTrigger
                 disabled={isLoading || deletingAgency}
-                className="text-red-600 p-2 text-center mt-2 rounded-md hover:bg-red-600 hover:text-white whitespace-nowrap"
+                className="text-red-600 p-2 text-center mt-2 rounded-md hove:bg-red-600 hover:text-white whitespace-nowrap"
               >
                 {deletingAgency ? 'Deleting...' : 'Delete Agency'}
               </AlertDialogTrigger>
@@ -416,7 +454,8 @@ const AgencyDetails = ({ data }: Props) => {
                 Are you absolutely sure?
               </AlertDialogTitle>
               <AlertDialogDescription className="text-left">
-                This action cannot be undone. This will permanently delete the Agency account and all related data.
+                This action cannot be undone. This will permanently delete the
+                Agency account and all related sub accounts.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter className="flex items-center">

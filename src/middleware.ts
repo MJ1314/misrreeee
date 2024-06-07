@@ -45,7 +45,8 @@ export default authMiddleware({
     }
 
     if (
-      url.pathname.startsWith('/agency')
+      url.pathname.startsWith('/agency') ||
+      url.pathname.startsWith('/subaccount')
     ) {
       return NextResponse.rewrite(new URL(`${pathWithSearchParams}`, req.url))
     }

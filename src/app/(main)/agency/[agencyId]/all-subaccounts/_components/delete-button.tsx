@@ -1,34 +1,34 @@
 'use client'
 import {
-  deleteAccount,
-  getAccountDetails,
+  deleteSubAccount,
+  getSubaccountDetails,
   saveActivityLogsNotification,
 } from '@/lib/queries'
 import { useRouter } from 'next/navigation'
 import React from 'react'
 
 type Props = {
-  accountId: string
+  subaccountId: string
 }
 
-const DeleteButton = ({ accountId }: Props) => {
+const DeleteButton = ({ subaccountId }: Props) => {
   const router = useRouter()
 
   return (
     <div
       className="text-white"
       onClick={async () => {
-        const response = await getAccountDetails(accountId)
+        const response = await getSubaccountDetails(subaccountId)
         await saveActivityLogsNotification({
-          agencyId: response.agencyId,  // Ensure the correct agencyId is passed
-          description: `Deleted an account | ${response?.name}`,
-          accountId,
+          agencyId: undefined,
+          description: `Deleted a subaccount | ${response?.name}`,
+          subaccountId,
         })
-        await deleteAccount(accountId)
+        await deleteSubAccount(subaccountId)
         router.refresh()
       }}
     >
-      Delete Account
+      Delete Sub Account
     </div>
   )
 }

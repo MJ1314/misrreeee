@@ -1,12 +1,18 @@
 'use client'
-import { AuthUserWithAgencySidebarOptions, UserWithPermissions } from '@/lib/types'
+import {
+  AuthUserWithAgencySigebarOptionsSubAccounts,
+  UserWithPermissionsAndSubAccounts,
+} from '@/lib/types'
 import { useModal } from '@/providers/modal-provider'
-import { User } from '@prisma/client'
+import { SubAccount, User } from '@prisma/client'
 import React, { useEffect, useState } from 'react'
 import { useToast } from '../ui/use-toast'
 import { useRouter } from 'next/navigation'
 import {
+  changeUserPermissions,
   getAuthUserDetails,
+  getUserPermissions,
+  saveActivityLogsNotification,
   updateUser,
 } from '@/lib/queries'
 import { z } from 'zod'
@@ -46,19 +52,24 @@ import { v4 } from 'uuid'
 
 type Props = {
   id: string | null
-  type: 'agency'
+  type: 'agency' | 'subaccount'
   userData?: Partial<User>
+  subAccounts?: SubAccount[]
 }
 
-const UserDetails = ({ id, type, userData }: Props) => {
+const UserDetails = ({ id, type, subAccounts, userData }: Props) => {
+  const [subAccountPermissions, setSubAccountsPermissions] =
+    useState<UserWithPermissionsAndSubAccounts | null>(null)
+
   const { data, setClose } = useModal()
   const [roleState, setRoleState] = useState('')
+  const [loadingPermissions, setLoadingPermissions] = useState(false)
   const [authUserData, setAuthUserData] =
-    useState<AuthUserWithAgencySidebarOptions | null>(null)
+    useState<AuthUserWithAgencySigebarOptionsSubAccounts | null>(null)
   const { toast } = useToast()
   const router = useRouter()
 
-  // Get authUserDetails
+  //Get authUSerDtails
 
   useEffect(() => {
     if (data.user) {
@@ -74,7 +85,12 @@ const UserDetails = ({ id, type, userData }: Props) => {
     name: z.string().min(1),
     email: z.string().email(),
     avatarUrl: z.string(),
-    role: z.enum(['AGENCY_OWNER', 'AGENCY_ADMIN', 'USER', 'GUEST']),
+    role: z.enum([
+      'AGENCY_OWNER',
+      'AGENCY_ADMIN',
+      'SUBACCOUNT_USER',
+      'SUBACCOUNT_GUEST',
+    ]),
   })
 
   const form = useForm<z.infer<typeof userDataSchema>>({
@@ -89,6 +105,16 @@ const UserDetails = ({ id, type, userData }: Props) => {
   })
 
   useEffect(() => {
+    if (!data.user) return
+    const getPermissions = async () => {
+      if (!data.user) return
+      const permission = await getUserPermissions(data.user.id)
+      setSubAccountsPermissions(permission)
+    }
+    getPermissions()
+  }, [data, form])
+
+  useEffect(() => {
     if (data.user) {
       form.reset(data.user)
     }
@@ -97,21 +123,84 @@ const UserDetails = ({ id, type, userData }: Props) => {
     }
   }, [userData, data])
 
+  const onChangePermission = async (
+    subAccountId: string,
+    val: boolean,
+    permissionsId: string | undefined
+  ) => {
+    if (!data.user?.email) return
+    setLoadingPermissions(true)
+    const response = await changeUserPermissions(
+      permissionsId ? permissionsId : v4(),
+      data.user.email,
+      subAccountId,
+      val
+    )
+    if (type === 'agency') {
+      await saveActivityLogsNotification({
+        agencyId: authUserData?.Agency?.id,
+        description: `Gave ${userData?.name} access to | ${
+          subAccountPermissions?.Permissions.find(
+            (p) => p.subAccountId === subAccountId
+          )?.SubAccount.name
+        } `,
+        subaccountId: subAccountPermissions?.Permissions.find(
+          (p) => p.subAccountId === subAccountId
+        )?.SubAccount.id,
+      })
+    }
+
+    if (response) {
+      toast({
+        title: 'Success',
+        description: 'The request was successfull',
+      })
+      if (subAccountPermissions) {
+        subAccountPermissions.Permissions.find((perm) => {
+          if (perm.subAccountId === subAccountId) {
+            return { ...perm, access: !perm.access }
+          }
+          return perm
+        })
+      }
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Failed',
+        description: 'Could not update permissions',
+      })
+    }
+    router.refresh()
+    setLoadingPermissions(false)
+  }
+
   const onSubmit = async (values: z.infer<typeof userDataSchema>) => {
     if (!id) return
     if (userData || data?.user) {
       const updatedUser = await updateUser(values)
+      authUserData?.Agency?.SubAccount.filter((subacc) =>
+        authUserData.Permissions.find(
+          (p) => p.subAccountId === subacc.id && p.access
+        )
+      ).forEach(async (subaccount) => {
+        await saveActivityLogsNotification({
+          agencyId: undefined,
+          description: `Updated ${userData?.name} information`,
+          subaccountId: subaccount.id,
+        })
+      })
+
       if (updatedUser) {
         toast({
           title: 'Success',
-          description: 'Updated User Information',
+          description: 'Update User Information',
         })
         setClose()
         router.refresh()
       } else {
         toast({
           variant: 'destructive',
-          title: 'Oops!',
+          title: 'Oppse!',
           description: 'Could not update user information',
         })
       }
@@ -128,7 +217,10 @@ const UserDetails = ({ id, type, userData }: Props) => {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4"
+          >
             <FormField
               disabled={form.formState.isSubmitting}
               control={form.control}
@@ -156,7 +248,11 @@ const UserDetails = ({ id, type, userData }: Props) => {
                 <FormItem className="flex-1">
                   <FormLabel>User full name</FormLabel>
                   <FormControl>
-                    <Input required placeholder="Full Name" {...field} />
+                    <Input
+                      required
+                      placeholder="Full Name"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -193,6 +289,16 @@ const UserDetails = ({ id, type, userData }: Props) => {
                   <Select
                     disabled={field.value === 'AGENCY_OWNER'}
                     onValueChange={(value) => {
+                      if (
+                        value === 'SUBACCOUNT_USER' ||
+                        value === 'SUBACCOUNT_GUEST'
+                      ) {
+                        setRoleState(
+                          'You need to have subaccounts to assign Subaccount access to team members.'
+                        )
+                      } else {
+                        setRoleState('')
+                      }
                       field.onChange(value)
                     }}
                     defaultValue={field.value}
@@ -203,13 +309,21 @@ const UserDetails = ({ id, type, userData }: Props) => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="AGENCY_ADMIN">Agency Admin</SelectItem>
+                      <SelectItem value="AGENCY_ADMING">
+                        Agency Admin
+                      </SelectItem>
                       {(data?.user?.role === 'AGENCY_OWNER' ||
                         userData?.role === 'AGENCY_OWNER') && (
-                        <SelectItem value="AGENCY_OWNER">Agency Owner</SelectItem>
+                        <SelectItem value="AGENCY_OWNER">
+                          Agency Owner
+                        </SelectItem>
                       )}
-                      <SelectItem value="USER">User</SelectItem>
-                      <SelectItem value="GUEST">Guest</SelectItem>
+                      <SelectItem value="SUBACCOUNT_USER">
+                        Sub Account User
+                      </SelectItem>
+                      <SelectItem value="SUBACCOUNT_GUEST">
+                        Sub Account Guest
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                   <p className="text-muted-foreground">{roleState}</p>
@@ -217,9 +331,52 @@ const UserDetails = ({ id, type, userData }: Props) => {
               )}
             />
 
-            <Button disabled={form.formState.isSubmitting} type="submit">
+            <Button
+              disabled={form.formState.isSubmitting}
+              type="submit"
+            >
               {form.formState.isSubmitting ? <Loading /> : 'Save User Details'}
             </Button>
+            {authUserData?.role === 'AGENCY_OWNER' && (
+              <div>
+                <Separator className="my-4" />
+                <FormLabel> User Permissions</FormLabel>
+                <FormDescription className="mb-4">
+                  You can give Sub Account access to team member by turning on
+                  access control for each Sub Account. This is only visible to
+                  agency owners
+                </FormDescription>
+                <div className="flex flex-col gap-4">
+                  {subAccounts?.map((subAccount) => {
+                    const subAccountPermissionsDetails =
+                      subAccountPermissions?.Permissions.find(
+                        (p) => p.subAccountId === subAccount.id
+                      )
+                    return (
+                      <div
+                        key={subAccount.id}
+                        className="flex items-center justify-between rounded-lg border p-4"
+                      >
+                        <div>
+                          <p>{subAccount.name}</p>
+                        </div>
+                        <Switch
+                          disabled={loadingPermissions}
+                          checked={subAccountPermissionsDetails?.access}
+                          onCheckedChange={(permission) => {
+                            onChangePermission(
+                              subAccount.id,
+                              permission,
+                              subAccountPermissionsDetails?.id
+                            )
+                          }}
+                        />
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
           </form>
         </Form>
       </CardContent>

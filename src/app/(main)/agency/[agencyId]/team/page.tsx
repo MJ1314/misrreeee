@@ -12,25 +12,29 @@ type Props = {
 
 const TeamPage = async ({ params }: Props) => {
   const authUser = await currentUser()
-  if (!authUser) return null
-
   const teamMembers = await db.user.findMany({
     where: {
-      agencyId: params.agencyId,
+      Agency: {
+        id: params.agencyId,
+      },
     },
     include: {
-      Agency: true,
-      Permissions: true,
+      Agency: { include: { SubAccount: true } },
+      Permissions: { include: { SubAccount: true } },
     },
   })
 
+  if (!authUser) return null
   const agencyDetails = await db.agency.findUnique({
     where: {
       id: params.agencyId,
     },
+    include: {
+      SubAccount: true,
+    },
   })
 
-  if (!agencyDetails) return null
+  if (!agencyDetails) return
 
   return (
     <DataTable
@@ -44,7 +48,7 @@ const TeamPage = async ({ params }: Props) => {
       filterValue="name"
       columns={columns}
       data={teamMembers}
-    />
+    ></DataTable>
   )
 }
 

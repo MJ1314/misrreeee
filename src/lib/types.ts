@@ -19,7 +19,7 @@ import {
 } from './queries'
 import { db } from './db'
 import { z } from 'zod'
-import { CoreMessage } from 'ai'
+
 import Stripe from 'stripe'
 
 export type NotificationWithUser =
@@ -37,7 +37,7 @@ export type NotificationWithUser =
     } & Notification)[]
   | undefined
 
-export type UserWithPermissions = Prisma.PromiseReturnType<
+export type UserWithPermissionsAndSubAccounts = Prisma.PromiseReturnType<
   typeof getUserPermissions
 >
 
@@ -46,29 +46,29 @@ export const FunnelPageSchema = z.object({
   pathName: z.string().optional(),
 })
 
-const __getUsersWithAgencyPermissionsSidebarOptions = async (
+const __getUsersWithAgencySubAccountPermissionsSidebarOptions = async (
   agencyId: string
 ) => {
   return await db.user.findFirst({
     where: { Agency: { id: agencyId } },
     include: {
-      Agency: true,
-      Permissions: true,
+      Agency: { include: { SubAccount: true } },
+      Permissions: { include: { SubAccount: true } },
     },
   })
 }
 
-export type AuthUserWithAgencySidebarOptions = Prisma.PromiseReturnType<
-  typeof getAuthUserDetails
->
+export type AuthUserWithAgencySigebarOptionsSubAccounts =
+  Prisma.PromiseReturnType<typeof getAuthUserDetails>
 
-export type UsersWithAgencyPermissionsSidebarOptions = Prisma.PromiseReturnType<
-  typeof __getUsersWithAgencyPermissionsSidebarOptions
->
+export type UsersWithAgencySubAccountPermissionsSidebarOptions =
+  Prisma.PromiseReturnType<
+    typeof __getUsersWithAgencySubAccountPermissionsSidebarOptions
+  >
 
 export type GetMediaFiles = Prisma.PromiseReturnType<typeof getMedia>
 
-export type CreateMediaType = Prisma.MediaCreateWithoutUserInput
+export type CreateMediaType = Prisma.MediaCreateWithoutSubaccountInput
 
 export type TicketAndTags = Ticket & {
   Tags: Tag[]
@@ -142,48 +142,8 @@ export type StripeCustomerType = {
 
 export type PricesList = Stripe.ApiList<Stripe.Price>
 
-export type FunnelsForAgency = Prisma.PromiseReturnType<
+export type FunnelsForSubAccount = Prisma.PromiseReturnType<
   typeof getFunnels
 >[0]
 
 export type UpsertFunnelPage = Prisma.FunnelPageCreateWithoutFunnelInput
-
-export type Message = CoreMessage & {
-  id: string
-}
-
-export interface Chat extends Record<string, any> {
-  id: string
-  title: string
-  createdAt: Date
-  userId: string
-  path: string
-  messages: Message[]
-  sharePath?: string
-}
-
-export type ServerActionResult<Result> = Promise<
-  | Result
-  | {
-      error: string
-    }
->
-
-export interface Session {
-  user: {
-    id: string
-    email: string
-  }
-}
-
-export interface AuthResult {
-  type: string
-  message: string
-}
-
-export interface User extends Record<string, any> {
-  id: string
-  email: string
-  password: string
-  salt: string
-}
